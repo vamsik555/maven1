@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    tools {
+        maven 'MAVEN_HOME'
+        jdk 'JAVA_HOME'
+    }
+    stages {
+        stage('gitchekout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'e1437c9d-1d1d-4afe-8c1c-dcb7a4459eb1', url: 'https://github.com/sowmith9/maven.git']]])
+            }
+        }
+        stage ('build') {
+             steps {
+                 sh "mvn clean install"
+                 }
+}
+      stage('Sonarqube') {
+    environment {
+        scannerHome = tool 'SonarQubeScanner'
+    }
+    steps {
+        withSonarQubeEnv('demo') {
+            sh "${scannerHome}/bin/sonar-scanner"
+        }
+        
+    }
+}  
+    }
+}
